@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#C3D9DF">
+  <title>Mood Check-In</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg: #C3D9DF;
+      --surface: #E0C58E;
+      --primary: #6F98A0;
+      --accent: #C9D6D3;
+      --rose: #C98880;
+      --text: #333;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      padding-bottom: 80px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 16px; }
+    h2 { font-size: 1.1rem; margin: 16px 0 8px; color: var(--primary); }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip.selected { border-color: var(--accent); background: #fff; }
+    .chip:active { transform: scale(0.95); }
+
+    input[type="number"], input[type="text"], textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--surface);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #fff;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 60px; }
+
+    .field { margin-bottom: 12px; }
+    .field label { display: block; margin-bottom: 4px; font-weight: 500; }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .btn:active { opacity: 0.8; }
+    .btn.accent { background: var(--rose); }
+    .btn.secondary { background: var(--surface); color: var(--text); }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      display: flex;
+      padding: 12px;
+      gap: 8px;
+    }
+    nav button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    nav button.active { background: var(--primary); color: #fff; }
+
+    .loop-item {
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .loop-item button {
+      background: var(--rose);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .loop-checkin {
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .loop-checkin-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .loop-checkin-header input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+    }
+    .loop-weights { display: none; margin-top: 8px; }
+    .loop-checkin.included .loop-weights { display: flex; }
+
+    .override-btn {
+      background: none;
+      border: 1px dashed var(--primary);
+      color: var(--primary);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Check-in Screen -->
+  <div id="checkin-screen" class="screen active">
+    <h1>Check In</h1>
+
+    <h2>Mood</h2>
+    <div class="chips multi" data-field="mood">
+      <div class="chip" data-value="happy">Happy</div>
+      <div class="chip" data-value="sad">Sad</div>
+      <div class="chip" data-value="meh">Meh</div>
+      <div class="chip" data-value="worried">Worried</div>
+      <div class="chip" data-value="excited">Excited</div>
+      <div class="chip" data-value="grateful">Grateful</div>
+      <div class="chip" data-value="wish-to-be-dead">Wish to be Dead</div>
+      <div class="chip" data-value="useless">Useless</div>
+      <div class="chip" data-value="motivated">Motivated</div>
+      <div class="chip" data-value="demotivated">Demotivated</div>
+      <div class="chip" data-value="grieving">Grieving</div>
+      <div class="chip" data-value="okay">Okay</div>
+      <div class="chip" data-value="angry">Angry</div>
+    </div>
+
+    <h2>Energy</h2>
+    <div class="chips" data-field="energy">
+      <div class="chip" data-value="high">High</div>
+      <div class="chip" data-value="medium">Medium</div>
+      <div class="chip" data-value="low">Low</div>
+      <div class="chip" data-value="exhausted">Exhausted</div>
+    </div>
+
+    <h2>Food</h2>
+    <div class="chips multi" data-field="food">
+      <div class="chip" data-value="crave-sugar">Crave Sugar</div>
+      <div class="chip" data-value="crave-junk">Crave Junk Food</div>
+      <div class="chip" data-value="eat-junk">Eat Junk Food</div>
+      <div class="chip" data-value="eat-sugar">Eat Lots of Sugar</div>
+      <div class="chip" data-value="healthy">Eat Healthy</div>
+      <div class="chip" data-value="overeating">Over Eating</div>
+      <div class="chip" data-value="low-appetite">Low Appetite</div>
+      <div class="chip" data-value="high-appetite">High Appetite</div>
+    </div>
+
+    <div id="sleep-section">
+      <h2>Sleep</h2>
+      <div class="field">
+        <label>Hours</label>
+        <input type="number" id="sleep-hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5">
+      </div>
+      <div class="chips multi" data-field="sleepQuality">
+        <div class="chip" data-value="great">Great</div>
+        <div class="chip" data-value="good">Good</div>
+        <div class="chip" data-value="difficulty-falling">Difficulty Falling Asleep</div>
+        <div class="chip" data-value="difficulty-leaving">Difficulty Leaving Bed</div>
+        <div class="chip" data-value="poor">Poor</div>
+        <div class="chip" data-value="terrible">Terrible</div>
+      </div>
+    </div>
+
+    <h2>Active Minutes</h2>
+    <div class="field">
+      <input type="number" id="active-minutes" min="0" placeholder="From Apple Health">
+    </div>
+
+    <h2>Activity Type</h2>
+    <div class="chips multi" data-field="activityType">
+      <div class="chip" data-value="gym">Gym</div>
+      <div class="chip" data-value="running">Running</div>
+      <div class="chip" data-value="walking">Walking</div>
+      <div class="chip" data-value="yoga">Yoga</div>
+      <div class="chip" data-value="home-workout">Home Workout</div>
+      <div class="chip" data-value="padel">Padel</div>
+      <div class="chip" data-value="pilates">Pilates</div>
+    </div>
+
+    <h2>Socialized</h2>
+    <div class="chips multi" data-field="socialized">
+      <div class="chip" data-value="none">None</div>
+      <div class="chip" data-value="video">Online Video</div>
+      <div class="chip" data-value="familiar">In-Person Familiar</div>
+      <div class="chip" data-value="new">In-Person New</div>
+      <div class="chip" data-value="workshop">Workshop</div>
+      <div class="chip" data-value="event">Event</div>
+      <div class="chip" data-value="work-office">Work at Office</div>
+    </div>
+
+    <div id="work-section">
+      <h2>Work Experience</h2>
+      <div class="chips multi" data-field="workSocialized">
+        <div class="chip" data-value="yes">Felt Socialized</div>
+        <div class="chip" data-value="no">Not Socialized</div>
+      </div>
+      <div class="chips multi" data-field="workUseful" style="margin-top: 8px;">
+        <div class="chip" data-value="yes">Felt Useful</div>
+        <div class="chip" data-value="no">Not Useful</div>
+      </div>
+      <div class="chips multi" data-field="workLocation" style="margin-top: 8px;">
+        <div class="chip" data-value="remote">Remote</div>
+        <div class="chip" data-value="home">Home</div>
+        <div class="chip" data-value="library">Library</div>
+        <div class="chip" data-value="office">Office</div>
+      </div>
+      <div class="chips multi" data-field="workPace" style="margin-top: 8px;">
+        <div class="chip" data-value="busy">Busy</div>
+        <div class="chip" data-value="quiet">Quiet</div>
+      </div>
+    </div>
+    <button id="work-override" class="override-btn hidden">+ Show Work Section</button>
+
+    <h2>Stress Source</h2>
+    <div class="field">
+      <input type="text" id="stress-source" placeholder="What's stressing you?">
+    </div>
+
+    <h2>Note</h2>
+    <div class="field">
+      <textarea id="note" placeholder="Anything else?"></textarea>
+    </div>
+
+    <h2>Extra Work</h2>
+    <div class="chips" data-field="extraWork">
+      <div class="chip" data-value="yes">Yes</div>
+      <div class="chip" data-value="no">No</div>
+    </div>
+    <div id="extra-work-minutes" class="field hidden" style="margin-top: 8px;">
+      <label>Extra Work Minutes</label>
+      <input type="number" id="extra-work-mins" min="0" placeholder="Minutes">
+    </div>
+
+    <h2>Period Phase</h2>
+    <div class="chips" data-field="periodPhase">
+      <div class="chip" data-value="early">Early</div>
+      <div class="chip" data-value="end">End</div>
+      <div class="chip" data-value="recently-finished">Recently Finished</div>
+      <div class="chip" data-value="1-2-weeks-before">1-2 Weeks Before</div>
+    </div>
+
+    <div id="loops-checkin-section">
+      <h2>Open Loops</h2>
+      <div id="loops-checkin-list"></div>
+    </div>
+
+    <button id="save-btn" class="btn accent">Save Check-In</button>
+  </div>
+
+  <!-- Loops Screen -->
+  <div id="loops-screen" class="screen">
+    <h1>Open Loops</h1>
+    <div class="field">
+      <input type="text" id="new-loop" placeholder="New loop...">
+    </div>
+    <button id="add-loop-btn" class="btn">Add Loop</button>
+    <h2>Active Loops</h2>
+    <div id="loops-list"></div>
+  </div>
+
+  <!-- Export Screen -->
+  <div id="export-screen" class="screen">
+    <h1>Export</h1>
+    <p style="margin-bottom: 16px;">Download all check-ins as CSV.</p>
+    <button id="export-btn" class="btn accent">Export CSV</button>
+    <p id="export-count" style="margin-top: 16px; color: var(--primary);"></p>
+  </div>
+
+  <nav>
+    <button data-screen="checkin-screen" class="active">Check In</button>
+    <button data-screen="loops-screen">Loops</button>
+    <button data-screen="export-screen">Export</button>
+  </nav>
+
+<script>
+// === Data Layer ===
+const STORAGE_KEY = 'checkins';
+const LOOPS_KEY = 'loops';
+
+function getCheckIns() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+}
+
+function saveCheckIn(data) {
+  const checkins = getCheckIns();
+  data.timestamp = new Date().toISOString();
+  checkins.push(data);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(checkins));
+  return data;
+}
+
+function getLoops() {
+  return JSON.parse(localStorage.getItem(LOOPS_KEY) || '[]');
+}
+
+function saveLoops(loops) {
+  localStorage.setItem(LOOPS_KEY, JSON.stringify(loops));
+}
+
+function addLoop(name) {
+  const loops = getLoops();
+  loops.push({ name, active: true, createdAt: new Date().toISOString() });
+  saveLoops(loops);
+}
+
+function archiveLoop(name) {
+  const loops = getLoops();
+  const loop = loops.find(l => l.name === name);
+  if (loop) loop.active = false;
+  saveLoops(loops);
+}
+
+function getActiveLoops() {
+  return getLoops().filter(l => l.active);
+}
+
+function isFirstCheckInToday() {
+  const checkins = getCheckIns();
+  if (checkins.length === 0) return true;
+  const today = new Date().toDateString();
+  return !checkins.some(c => new Date(c.timestamp).toDateString() === today);
+}
+
+function shouldShowWorkSection() {
+  const now = new Date();
+  const day = now.getDay();
+  const hour = now.getHours();
+  // Hide on Sat (6) / Sun (0) and after 17:00
+  if (day === 0 || day === 6) return false;
+  if (hour >= 17) return false;
+  return true;
+}
+
+function exportCSV() {
+  const checkins = getCheckIns();
+  if (checkins.length === 0) return null;
+
+  const headers = [
+    'timestamp', 'mood', 'energy', 'food', 'sleepHours', 'sleepQuality',
+    'activeMinutes', 'activityType', 'socialized', 'workSocialized',
+    'workUseful', 'workLocation', 'workPace', 'extraWork', 'extraWorkMinutes',
+    'stressSource', 'note', 'periodPhase', 'openLoops'
+  ];
+
+  const escape = v => {
+    if (v == null) return '';
+    const s = String(v);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+
+  const rows = checkins.map(c => {
+    const toStr = v => Array.isArray(v) ? v.join(';') : (v || '');
+    const loopsStr = (c.openLoops || []).map(l => l.name + ':' + l.weight).join(';');
+    return headers.map(h => {
+      if (h === 'openLoops') return escape(loopsStr);
+      if (['mood','food','sleepQuality','activityType','socialized','workSocialized','workUseful','workLocation','workPace'].includes(h)) return escape(toStr(c[h]));
+      return escape(c[h]);
+    }).join(',');
+  });
+
+  return headers.join(',') + '\n' + rows.join('\n');
+}
+
+// === UI Logic ===
+const screens = document.querySelectorAll('.screen');
+const navBtns = document.querySelectorAll('nav button');
+
+function showScreen(id) {
+  screens.forEach(s => s.classList.toggle('active', s.id === id));
+  navBtns.forEach(b => b.classList.toggle('active', b.dataset.screen === id));
+  if (id === 'loops-screen') renderLoopsList();
+  if (id === 'export-screen') updateExportCount();
+  if (id === 'checkin-screen') setupCheckInScreen();
+}
+
+navBtns.forEach(btn => btn.addEventListener('click', () => showScreen(btn.dataset.screen)));
+
+// Chip selection
+document.querySelectorAll('.chips').forEach(container => {
+  container.addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    if (container.classList.contains('multi')) {
+      chip.classList.toggle('selected');
+    } else {
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    }
+  });
+});
+
+// Extra work toggle
+document.querySelector('[data-field="extraWork"]').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.getElementById('extra-work-minutes').classList.toggle('hidden', chip.dataset.value !== 'yes');
+});
+
+// Work section visibility
+function setupCheckInScreen() {
+  const workSection = document.getElementById('work-section');
+  const overrideBtn = document.getElementById('work-override');
+  const sleepSection = document.getElementById('sleep-section');
+
+  if (shouldShowWorkSection()) {
+    workSection.classList.remove('hidden');
+    overrideBtn.classList.add('hidden');
+  } else {
+    workSection.classList.add('hidden');
+    overrideBtn.classList.remove('hidden');
+  }
+
+  sleepSection.classList.toggle('hidden', !isFirstCheckInToday());
+
+  renderLoopsCheckIn();
+}
+
+document.getElementById('work-override').addEventListener('click', () => {
+  document.getElementById('work-section').classList.remove('hidden');
+  document.getElementById('work-override').classList.add('hidden');
+});
+
+// Loops in check-in
+function renderLoopsCheckIn() {
+  const list = document.getElementById('loops-checkin-list');
+  const loops = getActiveLoops();
+
+  if (loops.length === 0) {
+    list.innerHTML = '<p style="color: var(--primary); font-size: 0.9rem;">No active loops</p>';
+    return;
+  }
+
+  list.innerHTML = loops.map(l => `
+    <div class="loop-checkin" data-loop="${l.name}">
+      <div class="loop-checkin-header">
+        <input type="checkbox" id="loop-${l.name}">
+        <label for="loop-${l.name}">${l.name}</label>
+      </div>
+      <div class="loop-weights chips" data-field="loop-weight-${l.name}">
+        <div class="chip" data-value="light">Light</div>
+        <div class="chip" data-value="moderate">Moderate</div>
+        <div class="chip" data-value="heavy">Heavy</div>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.loop-checkin').classList.toggle('included', cb.checked);
+    });
+  });
+
+  list.querySelectorAll('.chips').forEach(container => {
+    container.addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
+}
+
+// Loops list screen
+function renderLoopsList() {
+  const list = document.getElementById('loops-list');
+  const loops = getActiveLoops();
+
+  if (loops.length === 0) {
+    list.innerHTML = '<p style="color: var(--primary);">No active loops</p>';
+    return;
+  }
+
+  list.innerHTML = loops.map(l => `
+    <div class="loop-item">
+      <span>${l.name}</span>
+      <button data-archive="${l.name}">Archive</button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-archive]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      archiveLoop(btn.dataset.archive);
+      renderLoopsList();
+    });
+  });
+}
+
+document.getElementById('add-loop-btn').addEventListener('click', () => {
+  const input = document.getElementById('new-loop');
+  const name = input.value.trim();
+  if (!name) return;
+  addLoop(name);
+  input.value = '';
+  renderLoopsList();
+});
+
+// Save check-in
+document.getElementById('save-btn').addEventListener('click', () => {
+  const getValue = field => {
+    const selected = document.querySelector(`[data-field="${field}"] .selected`);
+    return selected ? selected.dataset.value : null;
+  };
+  const getMultiValue = field => {
+    return [...document.querySelectorAll(`[data-field="${field}"] .selected`)].map(c => c.dataset.value);
+  };
+
+  const extraWork = getValue('extraWork');
+  const data = {
+    mood: getMultiValue('mood'),
+    energy: getValue('energy'),
+    food: getMultiValue('food'),
+    sleepHours: parseFloat(document.getElementById('sleep-hours').value) || null,
+    sleepQuality: getMultiValue('sleepQuality'),
+    activeMinutes: parseInt(document.getElementById('active-minutes').value) || null,
+    activityType: getMultiValue('activityType'),
+    socialized: getMultiValue('socialized'),
+    workSocialized: getMultiValue('workSocialized'),
+    workUseful: getMultiValue('workUseful'),
+    workLocation: getMultiValue('workLocation'),
+    workPace: getMultiValue('workPace'),
+    extraWork: extraWork,
+    extraWorkMinutes: extraWork === 'yes' ? (parseInt(document.getElementById('extra-work-mins').value) || null) : null,
+    stressSource: document.getElementById('stress-source').value.trim() || null,
+    note: document.getElementById('note').value.trim() || null,
+    periodPhase: getValue('periodPhase'),
+    openLoops: []
+  };
+
+  document.querySelectorAll('.loop-checkin.included').forEach(el => {
+    const name = el.dataset.loop;
+    const weight = el.querySelector('.chip.selected')?.dataset.value || 'moderate';
+    data.openLoops.push({ name, weight });
+  });
+
+  saveCheckIn(data);
+
+  // Reset form
+  document.querySelectorAll('.chip.selected').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('input[type="number"], input[type="text"], textarea').forEach(i => i.value = '');
+  document.querySelectorAll('.loop-checkin').forEach(el => {
+    el.classList.remove('included');
+    el.querySelector('input[type="checkbox"]').checked = false;
+  });
+  document.getElementById('extra-work-minutes').classList.add('hidden');
+
+  alert('Saved!');
+  setupCheckInScreen();
+});
+
+// Export
+function updateExportCount() {
+  const count = getCheckIns().length;
+  document.getElementById('export-count').textContent = `${count} check-in${count !== 1 ? 's' : ''} stored`;
+}
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const csv = exportCSV();
+  if (!csv) {
+    alert('No check-ins to export');
+    return;
+  }
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mood-checkins-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Init
+setupCheckInScreen();
+updateExportCount();
+
+// Service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
