@@ -10,10 +10,12 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link rel="icon" href="assets/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #C3D9DF;
-      --surface: #E0C58E;
+      --surface: #C98880;
       --primary: #6F98A0;
       --accent: #C9D6D3;
       --rose: #C98880;
@@ -21,7 +23,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
       padding: 16px;
@@ -29,22 +31,22 @@
       min-height: 100vh;
     }
     h1 { font-size: 1.5rem; margin-bottom: 16px; }
-    h2 { font-size: 1.1rem; margin: 16px 0 8px; color: var(--primary); }
+    h2 { font-size: 1.1rem; margin: 16px 0 8px; color: #C89B4D; }
 
     .screen { display: none; }
     .screen.active { display: block; }
 
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip {
-      background: var(--surface);
-      border: 2px solid transparent;
+      background: #fff;
+      border: 2px solid var(--rose);
       border-radius: 20px;
       padding: 8px 16px;
       font-size: 0.95rem;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .chip.selected { border-color: var(--accent); background: #fff; }
+    .chip.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
     .chip:active { transform: scale(0.95); }
 
     input[type="number"], input[type="text"], textarea {
@@ -81,7 +83,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--surface);
+      background: #fff;
       display: flex;
       padding: 12px;
       gap: 8px;
@@ -95,13 +97,13 @@
       font-size: 0.9rem;
       cursor: pointer;
     }
-    nav button.active { background: var(--primary); color: #fff; }
+    nav button.active { background: var(--rose); color: #fff; }
 
     .loop-item {
-      background: var(--surface);
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
+      background: #FEFCF8;
+      padding: 16px 20px;
+      border-radius: 24px;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -145,6 +147,14 @@
       margin-top: 8px;
     }
 
+    .card {
+      background: #FEFCF8;
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 12px;
+    }
+    .card h2 { margin-top: 0; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -153,47 +163,53 @@
   <div id="checkin-screen" class="screen active">
     <h1>Check In</h1>
 
-    <h2>Mood</h2>
-    <div class="chips multi" data-field="mood">
-      <div class="chip" data-value="happy">Happy</div>
-      <div class="chip" data-value="sad">Sad</div>
-      <div class="chip" data-value="meh">Meh</div>
-      <div class="chip" data-value="lonely">Lonely</div>
-      <div class="chip" data-value="worried">Worried</div>
-      <div class="chip" data-value="excited">Excited</div>
-      <div class="chip" data-value="grateful">Grateful</div>
-      <div class="chip" data-value="wish-to-be-dead">Wish to be Dead</div>
-      <div class="chip" data-value="useless">Useless</div>
-      <div class="chip" data-value="motivated">Motivated</div>
-      <div class="chip" data-value="demotivated">Demotivated</div>
-      <div class="chip" data-value="grieving">Grieving</div>
-      <div class="chip" data-value="okay">Okay</div>
-      <div class="chip" data-value="angry">Angry</div>
-      <div class="chip" data-value="worthless">Worthless</div>
-      <div class="chip" data-value="energized">Energized</div>
+    <div class="card">
+      <h2>Mood</h2>
+      <div class="chips multi" data-field="mood">
+        <div class="chip" data-value="happy">Happy</div>
+        <div class="chip" data-value="sad">Sad</div>
+        <div class="chip" data-value="meh">Meh</div>
+        <div class="chip" data-value="lonely">Lonely</div>
+        <div class="chip" data-value="worried">Worried</div>
+        <div class="chip" data-value="excited">Excited</div>
+        <div class="chip" data-value="grateful">Grateful</div>
+        <div class="chip" data-value="wish-to-be-dead">Wish to be Dead</div>
+        <div class="chip" data-value="useless">Useless</div>
+        <div class="chip" data-value="motivated">Motivated</div>
+        <div class="chip" data-value="demotivated">Demotivated</div>
+        <div class="chip" data-value="grieving">Grieving</div>
+        <div class="chip" data-value="okay">Okay</div>
+        <div class="chip" data-value="angry">Angry</div>
+        <div class="chip" data-value="worthless">Worthless</div>
+        <div class="chip" data-value="energized">Energized</div>
+      </div>
     </div>
 
-    <h2>Energy</h2>
-    <div class="chips" data-field="energy">
-      <div class="chip" data-value="high">High</div>
-      <div class="chip" data-value="medium">Medium</div>
-      <div class="chip" data-value="low">Low</div>
-      <div class="chip" data-value="exhausted">Exhausted</div>
+    <div class="card">
+      <h2>Energy</h2>
+      <div class="chips" data-field="energy">
+        <div class="chip" data-value="high">High</div>
+        <div class="chip" data-value="medium">Medium</div>
+        <div class="chip" data-value="low">Low</div>
+        <div class="chip" data-value="exhausted">Exhausted</div>
+      </div>
     </div>
 
-    <h2>Food</h2>
-    <div class="chips multi" data-field="food">
-      <div class="chip" data-value="crave-sugar">Crave Sugar</div>
-      <div class="chip" data-value="crave-junk">Crave Junk Food</div>
-      <div class="chip" data-value="eat-junk">Eat Junk Food</div>
-      <div class="chip" data-value="eat-sugar">Eat Lots of Sugar</div>
-      <div class="chip" data-value="healthy">Eat Healthy</div>
-      <div class="chip" data-value="overeating">Over Eating</div>
-      <div class="chip" data-value="low-appetite">Low Appetite</div>
-      <div class="chip" data-value="high-appetite">High Appetite</div>
+    <div class="card">
+      <h2>Food</h2>
+      <div class="chips multi" data-field="food">
+        <div class="chip" data-value="crave-sugar">Crave Sugar</div>
+        <div class="chip" data-value="crave-junk">Crave Junk Food</div>
+        <div class="chip" data-value="eat-junk">Eat Junk Food</div>
+        <div class="chip" data-value="eat-sugar">Eat Lots of Sugar</div>
+        <div class="chip" data-value="healthy">Eat Healthy</div>
+        <div class="chip" data-value="overeating">Over Eating</div>
+        <div class="chip" data-value="low-appetite">Low Appetite</div>
+        <div class="chip" data-value="high-appetite">High Appetite</div>
+      </div>
     </div>
 
-    <div id="sleep-section">
+    <div id="sleep-section" class="card">
       <h2>Sleep</h2>
       <div class="field">
         <label>Hours</label>
@@ -210,34 +226,40 @@
       </div>
     </div>
 
-    <h2>Active Minutes</h2>
-    <div class="field">
-      <input type="number" id="active-minutes" min="0" placeholder="From Apple Health">
+    <div class="card">
+      <h2>Active Minutes</h2>
+      <div class="field">
+        <input type="number" id="active-minutes" min="0" placeholder="From Apple Health">
+      </div>
     </div>
 
-    <h2>Activity Type</h2>
-    <div class="chips multi" data-field="activityType">
-      <div class="chip" data-value="gym">Gym</div>
-      <div class="chip" data-value="running">Running</div>
-      <div class="chip" data-value="walking">Walking</div>
-      <div class="chip" data-value="yoga">Yoga</div>
-      <div class="chip" data-value="home-workout">Home Workout</div>
-      <div class="chip" data-value="padel">Padel</div>
-      <div class="chip" data-value="pilates">Pilates</div>
+    <div class="card">
+      <h2>Activity Type</h2>
+      <div class="chips multi" data-field="activityType">
+        <div class="chip" data-value="gym">Gym</div>
+        <div class="chip" data-value="running">Running</div>
+        <div class="chip" data-value="walking">Walking</div>
+        <div class="chip" data-value="yoga">Yoga</div>
+        <div class="chip" data-value="home-workout">Home Workout</div>
+        <div class="chip" data-value="padel">Padel</div>
+        <div class="chip" data-value="pilates">Pilates</div>
+      </div>
     </div>
 
-    <h2>Socialized</h2>
-    <div class="chips multi" data-field="socialized">
-      <div class="chip" data-value="none">None</div>
-      <div class="chip" data-value="video">Online Video</div>
-      <div class="chip" data-value="familiar">In-Person Familiar</div>
-      <div class="chip" data-value="new">In-Person New</div>
-      <div class="chip" data-value="workshop">Workshop</div>
-      <div class="chip" data-value="event">Event</div>
-      <div class="chip" data-value="work-office">Work at Office</div>
+    <div class="card">
+      <h2>Socialized</h2>
+      <div class="chips multi" data-field="socialized">
+        <div class="chip" data-value="none">None</div>
+        <div class="chip" data-value="video">Online Video</div>
+        <div class="chip" data-value="familiar">In-Person Familiar</div>
+        <div class="chip" data-value="new">In-Person New</div>
+        <div class="chip" data-value="workshop">Workshop</div>
+        <div class="chip" data-value="event">Event</div>
+        <div class="chip" data-value="work-office">Work at Office</div>
+      </div>
     </div>
 
-    <div id="work-section">
+    <div id="work-section" class="card">
       <h2>Work Experience</h2>
       <div class="chips multi" data-field="workSocialized">
         <div class="chip" data-value="yes">Felt Socialized</div>
@@ -245,7 +267,7 @@
       </div>
       <div class="chips multi" data-field="workUseful" style="margin-top: 8px;">
         <div class="chip" data-value="yes">Felt Useful</div>
-        <div class="chip" data-value="no">Not Useful</div>
+        <div class="chip" data-value="no">Felt Useless</div>
         <div class="chip" data-value="Productive">Productive</div>
       </div>
       <div class="chips multi" data-field="workLocation" style="margin-top: 8px;">
@@ -261,35 +283,43 @@
     </div>
     <button id="work-override" class="override-btn hidden">+ Show Work Section</button>
 
-    <h2>Stress Source</h2>
-    <div class="field">
-      <input type="text" id="stress-source" placeholder="What's stressing you?">
+    <div class="card">
+      <h2>Extra Work</h2>
+      <div class="chips" data-field="extraWork">
+        <div class="chip" data-value="yes">Yes</div>
+        <div class="chip" data-value="no">No</div>
+      </div>
+      <div id="extra-work-minutes" class="field hidden" style="margin-top: 8px;">
+        <label>Extra Work Minutes</label>
+        <input type="number" id="extra-work-mins" min="0" placeholder="Minutes">
+      </div>
     </div>
 
-    <h2>Note</h2>
-    <div class="field">
-      <textarea id="note" placeholder="Anything else?"></textarea>
+    <div class="card">
+      <h2>Period Phase</h2>
+      <div class="chips" data-field="periodPhase">
+        <div class="chip" data-value="early">Early</div>
+        <div class="chip" data-value="end">End</div>
+        <div class="chip" data-value="recently-finished">Recently Finished</div>
+        <div class="chip" data-value="1-2-weeks-before">1-2 Weeks Before</div>
+      </div>
     </div>
 
-    <h2>Extra Work</h2>
-    <div class="chips" data-field="extraWork">
-      <div class="chip" data-value="yes">Yes</div>
-      <div class="chip" data-value="no">No</div>
+    <div class="card">
+      <h2>Any Stress Source</h2>
+      <div class="field">
+        <input type="text" id="stress-source" placeholder="What's stressing you?">
+      </div>
     </div>
-    <div id="extra-work-minutes" class="field hidden" style="margin-top: 8px;">
-      <label>Extra Work Minutes</label>
-      <input type="number" id="extra-work-mins" min="0" placeholder="Minutes">
-    </div>
-
-    <h2>Period Phase</h2>
-    <div class="chips" data-field="periodPhase">
-      <div class="chip" data-value="early">Early</div>
-      <div class="chip" data-value="end">End</div>
-      <div class="chip" data-value="recently-finished">Recently Finished</div>
-      <div class="chip" data-value="1-2-weeks-before">1-2 Weeks Before</div>
+    
+    <div class="card">
+      <h2>Note</h2>
+      <div class="field">
+        <textarea id="note" placeholder="Anything else?"></textarea>
+      </div>
     </div>
 
-    <div id="loops-checkin-section">
+    <div id="loops-checkin-section" class="card">
       <h2>Open Loops</h2>
       <div id="loops-checkin-list"></div>
     </div>
@@ -300,10 +330,13 @@
   <!-- Loops Screen -->
   <div id="loops-screen" class="screen">
     <h1>Open Loops</h1>
-    <div class="field">
-      <input type="text" id="new-loop" placeholder="New loop...">
+    <div class="card">
+      <h2>New Loop</h2>
+      <div class="field">
+        <input type="text" id="new-loop" placeholder="New loop...">
+      </div>
+      <button id="add-loop-btn" class="btn accent">Add Loop</button>
     </div>
-    <button id="add-loop-btn" class="btn">Add Loop</button>
     <h2>Active Loops</h2>
     <div id="loops-list"></div>
   </div>
@@ -346,8 +379,9 @@ document.querySelectorAll('.chips').forEach(container => {
     if (container.classList.contains('multi')) {
       chip.classList.toggle('selected');
     } else {
+      const wasSelected = chip.classList.contains('selected');
       container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-      chip.classList.add('selected');
+      if (!wasSelected) chip.classList.add('selected');
     }
   });
 });
@@ -417,8 +451,9 @@ function renderLoopsCheckIn() {
     container.addEventListener('click', e => {
       const chip = e.target.closest('.chip');
       if (!chip) return;
+      const wasSelected = chip.classList.contains('selected');
       container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-      chip.classList.add('selected');
+      if (!wasSelected) chip.classList.add('selected');
     });
   });
 }
