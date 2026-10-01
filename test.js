@@ -1,90 +1,20 @@
-// Minimal test for data layer - run with: node test.js
+// Minimal data-layer tests — run with: node test.js
 
-// Mock localStorage
 global.localStorage = (() => {
   let store = {};
   return {
-    getItem: k => store[k] ?? null,
-    setItem: (k, v) => store[k] = v,
-    clear: () => store = {}
+    getItem: k => (k in store ? store[k] : null),
+    setItem: (k, v) => { store[k] = v; },
+    clear: () => { store = {}; }
   };
 })();
 
-// Extract data layer functions (copy from index.html)
-const STORAGE_KEY = 'checkins';
-const LOOPS_KEY = 'loops';
+const {
+  getCheckIns, saveCheckIn,
+  getLoops, addLoop, archiveLoop, getActiveLoops,
+  exportCSV
+} = require('./app.js');
 
-function getCheckIns() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-}
-
-function saveCheckIn(data) {
-  const checkins = getCheckIns();
-  data.timestamp = new Date().toISOString();
-  checkins.push(data);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(checkins));
-  return data;
-}
-
-function getLoops() {
-  return JSON.parse(localStorage.getItem(LOOPS_KEY) || '[]');
-}
-
-function saveLoops(loops) {
-  localStorage.setItem(LOOPS_KEY, JSON.stringify(loops));
-}
-
-function addLoop(name) {
-  const loops = getLoops();
-  loops.push({ name, active: true, createdAt: new Date().toISOString() });
-  saveLoops(loops);
-}
-
-function archiveLoop(name) {
-  const loops = getLoops();
-  const loop = loops.find(l => l.name === name);
-  if (loop) loop.active = false;
-  saveLoops(loops);
-}
-
-function getActiveLoops() {
-  return getLoops().filter(l => l.active);
-}
-
-function exportCSV() {
-  const checkins = getCheckIns();
-  if (checkins.length === 0) return null;
-
-  const headers = [
-    'timestamp', 'mood', 'energy', 'food', 'sleepHours', 'sleepQuality',
-    'activeMinutes', 'activityType', 'socialized', 'workSocialized',
-    'workUseful', 'workLocation', 'workPace', 'extraWork', 'extraWorkMinutes',
-    'stressSource', 'note', 'periodPhase', 'openLoops'
-  ];
-
-  const escape = v => {
-    if (v == null) return '';
-    const s = String(v);
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-      return '"' + s.replace(/"/g, '""') + '"';
-    }
-    return s;
-  };
-
-  const rows = checkins.map(c => {
-    const toStr = v => Array.isArray(v) ? v.join(';') : (v || '');
-    const loopsStr = (c.openLoops || []).map(l => l.name + ':' + l.weight).join(';');
-    return headers.map(h => {
-      if (h === 'openLoops') return escape(loopsStr);
-      if (['mood','food','sleepQuality','activityType','socialized','workSocialized','workUseful','workLocation','workPace'].includes(h)) return escape(toStr(c[h]));
-      return escape(c[h]);
-    }).join(',');
-  });
-
-  return headers.join(',') + '\n' + rows.join('\n');
-}
-
-// Tests
 function test(name, fn) {
   localStorage.clear();
   try {
@@ -96,8 +26,8 @@ function test(name, fn) {
   }
 }
 
-function assert(condition, msg) {
-  if (!condition) throw new Error(msg);
+function assert(cond, msg) {
+  if (!cond) throw new Error(msg);
 }
 
 test('saveCheckIn adds timestamp and persists', () => {
@@ -122,7 +52,11 @@ test('addLoop and archiveLoop', () => {
 });
 
 test('exportCSV produces valid CSV', () => {
-  saveCheckIn({ mood: ['happy', 'grateful'], note: 'test, with "comma"', openLoops: [{ name: 'X', weight: 'heavy' }] });
+  saveCheckIn({
+    mood: ['happy', 'grateful'],
+    note: 'test, with "comma"',
+    openLoops: [{ name: 'X', weight: 'heavy' }]
+  });
   const csv = exportCSV();
   assert(csv.startsWith('timestamp,mood,'), 'should have headers');
   assert(csv.includes('happy;grateful'), 'should include mood array');
