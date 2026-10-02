@@ -10,9 +10,14 @@
 
 # Personal exports — the CSVs you pull off the phone
 result/
+exports/
 
 # Logo candidates
 other-logo-options
 
 # planing
 plan
+
+# Distribution / packaging
+.python-version
+
