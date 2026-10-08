@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #C3D9DF;
+      --bg: #bce3ee;
       --surface: #C98880;
       --primary: #6F98A0;
       --accent: #C9D6D3;
@@ -156,6 +156,25 @@
     .card h2 { margin-top: 0; }
 
     .hidden { display: none !important; }
+
+    .slider-field { margin-bottom: 8px; }
+    .slider-field label { display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500; }
+    .slider-field input[type="range"] {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      background: var(--accent);
+      border-radius: 4px;
+      outline: none;
+    }
+    .slider-field input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -168,6 +187,7 @@
       <div class="chips multi" data-field="mood">
         <div class="chip" data-value="excited">Excited</div>
         <div class="chip" data-value="happy">Happy</div>
+        <div class="chip" data-value="loved">Loved</div>
         <div class="chip" data-value="grateful">Grateful</div>
         <div class="chip" data-value="enjoy">Enjoying life</div>
         <div class="chip" data-value="energized">Energized</div>
@@ -178,6 +198,7 @@
         <div class="chip" data-value="stressed">Stressed</div>
         <div class="chip" data-value="worried">Worried</div>
         <div class="chip" data-value="demotivated">Demotivated</div>
+        <div class="chip" data-value="offended">Offended</div>
         <div class="chip" data-value="sad">Sad</div>
         <div class="chip" data-value="angry">Angry</div>
         <div class="chip" data-value="grieving">Grieving</div>
@@ -189,11 +210,9 @@
 
     <div class="card">
       <h2>Energy</h2>
-      <div class="chips" data-field="energy">
-        <div class="chip" data-value="high">High</div>
-        <div class="chip" data-value="medium">Medium</div>
-        <div class="chip" data-value="low">Low</div>
-        <div class="chip" data-value="exhausted">Exhausted</div>
+      <div class="slider-field">
+        <label>Level <span id="energy-val">3</span></label>
+        <input type="range" id="energy" min="1" max="5" value="3">
       </div>
     </div>
 
@@ -214,9 +233,9 @@
 
     <div id="sleep-section" class="card">
       <h2>Sleep</h2>
-      <div class="field">
-        <label>Hours</label>
-        <input type="number" id="sleep-hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5">
+      <div class="slider-field">
+        <label>Hours <span id="sleep-hours-val">5</span></label>
+        <input type="range" id="sleep-hours" min="1" max="10" step="0.5" value="5">
       </div>
       <div class="chips multi" data-field="sleepQuality">
         <div class="chip" data-value="great">Great</div>
@@ -240,6 +259,7 @@
       <h2>Activity Type</h2>
       <div class="chips multi" data-field="activityType">
         <div class="chip" data-value="gym">Gym</div>
+        <div class="chip" data-value="dancing">Dancing</div>
         <div class="chip" data-value="running">Running</div>
         <div class="chip" data-value="walking">Walking</div>
         <div class="chip" data-value="yoga">Yoga</div>
@@ -254,7 +274,7 @@
       <h2>Socialized</h2>
       <div class="chips multi" data-field="socialized">
         <div class="chip" data-value="none">None</div>
-        <div class="chip" data-value="video">Online Video</div>
+        <div class="chip" data-value="call">Call</div>
         <div class="chip" data-value="familiar">In-Person Familiar</div>
         <div class="chip" data-value="new">In-Person New</div>
         <div class="chip" data-value="workshop">Workshop</div>
@@ -275,12 +295,12 @@
         <div class="chip" data-value="Productive">Productive</div>
       </div>
       <div class="chips multi" data-field="workLocation" style="margin-top: 8px;">
-        <div class="chip" data-value="remote">Remote</div>
-        <div class="chip" data-value="home">Home</div>
+        <div class="chip" data-value="home">Home-remote</div>
         <div class="chip" data-value="library">Library</div>
+        <div class="chip" data-value="cafe">Cafe-remote</div>
         <div class="chip" data-value="office">Office</div>
       </div>
-      <div class="chips multi" data-field="workPace" style="margin-top: 8px;">
+      <div class="chips multi" data-field="workLoad" style="margin-top: 8px;">
         <div class="chip" data-value="busy">Busy</div>
         <div class="chip" data-value="quiet">Quiet</div>
       </div>
@@ -388,6 +408,14 @@ document.querySelectorAll('.chips').forEach(container => {
       if (!wasSelected) chip.classList.add('selected');
     }
   });
+});
+
+// Slider value display
+document.getElementById('sleep-hours').addEventListener('input', e => {
+  document.getElementById('sleep-hours-val').textContent = e.target.value;
+});
+document.getElementById('energy').addEventListener('input', e => {
+  document.getElementById('energy-val').textContent = e.target.value;
 });
 
 // Extra work toggle
@@ -509,9 +537,9 @@ document.getElementById('save-btn').addEventListener('click', () => {
   const extraWork = getValue('extraWork');
   const data = {
     mood: getMultiValue('mood'),
-    energy: getValue('energy'),
+    energy: parseInt(document.getElementById('energy').value),
     food: getMultiValue('food'),
-    sleepHours: parseFloat(document.getElementById('sleep-hours').value) || null,
+    sleepHours: parseFloat(document.getElementById('sleep-hours').value),
     sleepQuality: getMultiValue('sleepQuality'),
     activeMinutes: parseInt(document.getElementById('active-minutes').value) || null,
     activityType: getMultiValue('activityType'),
@@ -519,7 +547,7 @@ document.getElementById('save-btn').addEventListener('click', () => {
     workSocialized: getMultiValue('workSocialized'),
     workUseful: getMultiValue('workUseful'),
     workLocation: getMultiValue('workLocation'),
-    workPace: getMultiValue('workPace'),
+    workLoad: getMultiValue('workLoad'),
     extraWork: extraWork,
     extraWorkMinutes: extraWork === 'yes' ? (parseInt(document.getElementById('extra-work-mins').value) || null) : null,
     stressSource: document.getElementById('stress-source').value.trim() || null,
@@ -539,6 +567,10 @@ document.getElementById('save-btn').addEventListener('click', () => {
   // Reset form
   document.querySelectorAll('.chip.selected').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('input[type="number"], input[type="text"], textarea').forEach(i => i.value = '');
+  document.getElementById('sleep-hours').value = 5;
+  document.getElementById('sleep-hours-val').textContent = '5';
+  document.getElementById('energy').value = 3;
+  document.getElementById('energy-val').textContent = '3';
   document.querySelectorAll('.loop-checkin').forEach(el => {
     el.classList.remove('included');
     el.querySelector('input[type="checkbox"]').checked = false;
